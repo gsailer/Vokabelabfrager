@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # Vokabelabfrager Gabriel Sailer
 # First Version - Sept 2015
-import csv, random, sys, argparse
+import csv, random, sys
 
 def loadCSV(table, liste):
 	with open(table, 'rb') as csvfile:
@@ -75,13 +75,9 @@ class Vokabelliste:
 		pass
 
 # ------ test -------
-parser = argparse.ArgumentParser()
-parser.add_argument("vokabeln", help="Pfad zur Vokabelliste im CSV Format",
-                    type=str)
-args = parser.parse_args()
-
 print "Vokabelabfrager"
 print (len("Vokabelabfrager")*2)*"#"
 
-vokabelnTest = Vokabelliste(args.vokabeln)
+liste = raw_input("Welche Vokabelliste willst du beutzen?\n")
+vokabelnTest = Vokabelliste(liste)
 vokabelnTest.abfragen()
