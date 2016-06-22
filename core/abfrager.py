@@ -3,8 +3,9 @@
 import random
 import sys
 import argparse
-import settings
 import sqlite3
+import imp
+settings = imp.load_source('settings','/Users/neo/Desktop/Vokabelabfrager/core/settings.py')
 
 
 class Vokabel:
@@ -24,7 +25,7 @@ class Vokabelliste:
     def loadData(self):
         conn = sqlite3.connect(settings.database)
         c = conn.cursor()
-        c.execute('SELECT VID, bedeutung1, bedeutung2 FROM data WHERE src=8')
+        c.execute('SELECT VID, bedeutung1, bedeutung2 FROM data WHERE src=?',settings.liste)
         data = c.fetchall()
         for row in data:
             vokabel = Vokabel(row[0], row[1], row[2])
@@ -105,22 +106,23 @@ class Vokabelliste:
         pass
 
 # ------ test -------
-print "Vokabelabfrager"
-print (len("Vokabelabfrager")*2)*"#"
+if __name__ == "__main__":
+    print "Vokabelabfrager"
+    print (len("Vokabelabfrager")*2)*"#"
 
-vokabelnTest = Vokabelliste()
-try:
-    while True:
-        quest, answ, opt = vokabelnTest.abfrageQuiz_loadData()
-        result = vokabelnTest.abfrageQuiz(quest, answ, opt)
-        if result == False:
-            print "Wrong!\n"
-            print 20*"-"
-        else:
-            print "Correct\n"
-            print 20*"-"
+    vokabelnTest = Vokabelliste()
+    try:
+        while True:
+            quest, answ, opt = vokabelnTest.abfrageQuiz_loadData()
+            result = vokabelnTest.abfrageQuiz(quest, answ, opt)
+            if result == False:
+                print "Wrong!\n"
+                print 20*"-"
+            else:
+                print "Correct\n"
+                print 20*"-"
 
-except KeyboardInterrupt:
-    vokabelnTest.statistik()
-    print "\nExit."
-    sys.exit(0)
+    except KeyboardInterrupt:
+        vokabelnTest.statistik()
+        print "\nExit."
+        sys.exit(0)
