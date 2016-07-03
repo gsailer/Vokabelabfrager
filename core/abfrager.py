@@ -5,16 +5,20 @@ import sys
 import argparse
 import sqlite3
 import imp
-settings = imp.load_source('settings','/Users/neo/Desktop/Vokabelabfrager/core/settings.py')
 
+if __name__ == "__main__":
+    settings = imp.load_source('settings','./settings.py')
+else:
+    settings = imp.load_source('settings', '../core/settings.py')
 
 class Vokabel:
     abgefragt = False
 
-    def __init__(self, vid, sprache1, sprache2):
+    def __init__(self, vid, sprache1, sprache2, liste):
         self.vid = vid
         self.sprache1 = sprache1
         self.sprache2 = sprache2
+        self.liste = liste
 
 class Vokabelliste:
     vokabeln = []
@@ -25,61 +29,49 @@ class Vokabelliste:
     def loadData(self):
         conn = sqlite3.connect(settings.database)
         c = conn.cursor()
-        c.execute('SELECT VID, bedeutung1, bedeutung2 FROM data WHERE src=?',settings.liste)
+        c.execute('SELECT VID, bedeutung1, bedeutung2, src FROM data')
         data = c.fetchall()
         for row in data:
-            vokabel = Vokabel(row[0], row[1], row[2])
+            vokabel = Vokabel(row[0], row[1], row[2], row[3])
             self.vokabeln.append(vokabel)
         return 0
+
+    def getVokabelByList(self, liste):
+        newlist = []
+        for vocab in self.vokabeln:
+            if vocab.liste == liste:
+                newlist.append(vocab)
+        return newlist, len(newlist)
+
+    def getFiles(self):
+        conn = sqlite3.connect(settings.database)
+        c = conn.cursor()
+        c.execute('SELECT filename FROM files;')
+        files_raw = c.fetchall()
+        files = []
+        for file in files_raw:
+            fl = file[0]
+            fl = fl[3:-4]
+            files.append(fl)
+        return files
 
     def statistik(self):
         pass
 
-    def abfrage(self):
-        while True:
-            ran = random.randint(0, len(self.vokabeln)-1)
-            while self.vokabeln[ran].abgefragt == True:
-                ran = random.randint(0, len(self.vokabeln)-1)
-            print self.vokabeln[ran].sprache1
-            try:
-                answer = raw_input("Deutsch: ")
-            except KeyboardInterrupt:
-                print "\nByeBye"
-                self.statistik()
-                sys.exit(0)
-            if answer == self.vokabeln[ran].sprache2 or answer == self.vokabeln[ran].sprache2.lower():
-                print "Correct answer\n"
-                self.vokabeln[ran].abgefragt = True
-                continue
-            else:
-                while answer != self.vokabeln[ran].sprache2 or answer != self.vokabeln[ran].sprache2.lower():
-                    print "Try it again"
-                    try:
-                        answer = raw_input("Deutsch: ")
-                    except KeyboardInterrupt:
-                        print "\nByeBye :)"
-                        self.statistik()
-                        sys.exit(0)
-                    print "Well done.\n"
-
-    def abfrageQuiz_loadData(self):
+    def abfrageQuiz_loadData(self, list, vokabelindex):
         # multiple choice with four
         # possible answers
-        question = ""
-        answer = ""
+        vokabelnByList, _ = self.getVokabelByList(list)
+        question = vokabelnByList[vokabelindex].sprache1
+        answer = vokabelnByList[vokabelindex].sprache2
         options = []
-        # load question+answer
-        ran = random.randint(0, len(self.vokabeln)-1)
-        while self.vokabeln[ran].abgefragt == True:
-            ran = random.randint(0, len(self.vokabeln)-1)
-        question = self.vokabeln[ran].sprache1
-        answer = self.vokabeln[ran].sprache2
+    
         # load options
         for x in xrange(0,3):
-            rand = random.randint(0, len(self.vokabeln)-1)
-            while rand == ran:
-                rand = random.randint(0, len(self.vokabeln)-1)
-            options.append(self.vokabeln[rand].sprache2)
+            ran = random.randint(0, len(vokabelnByList)-1)
+            while ran == vokabelindex:
+                ran = random.randint(0, len(vokabelnByList)-1)
+            options.append(vokabelnByList[ran].sprache2)
         options.append(answer)
         random.shuffle(options)
         # returns: question string, answer string, options array[str]
@@ -101,28 +93,3 @@ class Vokabelliste:
             return True
         else:
             return False
-
-    def speichern(self):
-        pass
-
-# ------ test -------
-if __name__ == "__main__":
-    print "Vokabelabfrager"
-    print (len("Vokabelabfrager")*2)*"#"
-
-    vokabelnTest = Vokabelliste()
-    try:
-        while True:
-            quest, answ, opt = vokabelnTest.abfrageQuiz_loadData()
-            result = vokabelnTest.abfrageQuiz(quest, answ, opt)
-            if result == False:
-                print "Wrong!\n"
-                print 20*"-"
-            else:
-                print "Correct\n"
-                print 20*"-"
-
-    except KeyboardInterrupt:
-        vokabelnTest.statistik()
-        print "\nExit."
-        sys.exit(0)

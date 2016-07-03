@@ -4,7 +4,12 @@
 </head>
 <body>
 <h1>Vokabelabfrager</h1>
-
+Wähle ein Vokabelset aus:
+<ul>
+	{% for file in files %}
+	<li><a href="{{ url_for('abfrage', file = file) }}">{{ file }}</a></li>
+	{% endfor %}
+	</ul>
 </body>
 <footer>
 A project by Gabriel Sailer written with Flask

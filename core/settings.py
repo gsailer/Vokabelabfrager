@@ -1,4 +1,4 @@
 # Configfile Vokabelabfrager
-database = "../../Vokabeldata/data.db"
-source="../../Vokabeldata"
-liste = 8
+database = "../data.db"
+source="../"
+liste = 1
