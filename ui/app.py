@@ -31,4 +31,4 @@ def vokabeldata(list):
 	return jsonify(vokabelset = data)
 
 if __name__ == "__main__":
-	app.run(host="172.24.41.230", port=80) # port 80 requires sudo
+	app.run(host="172.24.41.167", port=80) # port 80 requires sudo
